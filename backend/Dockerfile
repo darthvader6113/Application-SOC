@@ -5,14 +5,17 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies using package-lock for lightning-fast deterministic installation
+# Cap Node memory strictly to 256MB to fit within 2GB RAM VPS
+ENV NODE_OPTIONS="--max-old-space-size=256"
+
+# Install dependencies using package-lock without running heavy scripts
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
+RUN npm ci --prefer-offline --no-audit --no-fund --ignore-scripts || npm install --prefer-offline --no-audit --no-fund --ignore-scripts
 
 # Copy source and build TypeScript
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev && npm cache clean --force
+RUN npm run build && npm prune --omit=dev --ignore-scripts && npm cache clean --force
 
 # ==========================================
 # STAGE 2: Ultra-Lightweight Production Runtime
@@ -23,7 +26,6 @@ FROM node:22-alpine AS runner
 WORKDIR /app
 
 ENV NODE_ENV=production
-# Restrict Node memory ceiling to 256MB to avoid exhausting 2GB VPS
 ENV NODE_OPTIONS="--max-old-space-size=256"
 
 # Copy pre-pruned production dependencies and compiled artifacts from builder
