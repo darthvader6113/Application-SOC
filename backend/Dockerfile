@@ -1,14 +1,16 @@
 # ==========================================
 # STAGE 1: Build Stage & Production Dependencies
-# Stable Node 20 LTS Alpine (prevents Node 22 Alpine npm bug)
+# Stable Node 20 LTS Alpine
 # ==========================================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies using package-lock without audit/fund checks
+ENV NODE_ENV=development
+
+# Install all dependencies (including typescript)
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
+RUN npm install --prefer-offline --no-audit --no-fund
 
 # Copy source and build TypeScript
 COPY tsconfig.json ./

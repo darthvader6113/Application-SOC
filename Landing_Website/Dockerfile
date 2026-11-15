@@ -1,21 +1,23 @@
 # ==========================================
 # STAGE 1: Build React Production Bundle
-# Stable Node 20 LTS Alpine (prevents Node 22 Alpine npm bug)
+# Stable Node 20 LTS Alpine
 # ==========================================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy lockfile and package.json for fast cached installation
+ENV NODE_ENV=development
+# Allocate safe memory for Vite bundling
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+
+# Install all packages (React, Mantine, Vite, TypeScript)
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
+RUN npm install --prefer-offline --no-audit --no-fund
 
 COPY tsconfig.json vite.config.ts postcss.config.cjs index.html ./
 COPY public ./public
 COPY src ./src
 
-# Allocate safe memory for Vite bundling
-ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 # ==========================================
