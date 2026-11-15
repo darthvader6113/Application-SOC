@@ -1,31 +1,29 @@
 # ==========================================
 # STAGE 1: Build Stage & Production Dependencies
+# Stable Node 20 LTS Alpine (prevents Node 22 Alpine npm bug)
 # ==========================================
-FROM node:22-alpine AS builder
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Cap Node memory strictly to 256MB to fit within 2GB RAM VPS
-ENV NODE_OPTIONS="--max-old-space-size=256"
-
-# Install dependencies using package-lock without running heavy scripts
+# Install dependencies using package-lock without audit/fund checks
 COPY package.json package-lock.json* ./
-RUN npm ci --prefer-offline --no-audit --no-fund --ignore-scripts || npm install --prefer-offline --no-audit --no-fund --ignore-scripts
+RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
 
 # Copy source and build TypeScript
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev --ignore-scripts && npm cache clean --force
+RUN npm run build && npm prune --omit=dev && npm cache clean --force
 
 # ==========================================
 # STAGE 2: Ultra-Lightweight Production Runtime
-# (No npm install in this stage — copies pre-pruned modules)
 # ==========================================
-FROM node:22-alpine AS runner
+FROM node:20-alpine AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+# Restrict Node memory ceiling to 256MB to avoid exhausting 2GB VPS
 ENV NODE_OPTIONS="--max-old-space-size=256"
 
 # Copy pre-pruned production dependencies and compiled artifacts from builder
