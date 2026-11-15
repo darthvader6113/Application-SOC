@@ -47,11 +47,15 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+      network: host
     container_name: hardman_reed_api
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
+    dns:
+      - 8.8.8.8
+      - 1.1.1.1
     environment:
       PORT: 5000
       NODE_ENV: production
