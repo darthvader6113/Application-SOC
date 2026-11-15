@@ -5,13 +5,16 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-COPY package.json ./
-RUN npm install
+# Copy lockfile and package.json for fast cached installation
+COPY package.json package-lock.json* ./
+RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
 
 COPY tsconfig.json vite.config.ts postcss.config.cjs index.html ./
 COPY public ./public
 COPY src ./src
 
+# Allocate safe memory for Vite bundling
+ENV NODE_OPTIONS="--max-old-space-size=1024"
 RUN npm run build
 
 # ==========================================
@@ -32,4 +35,3 @@ HEALTHCHECK --interval=30s --timeout=3s --retries=3 \
   CMD wget --quiet --tries=1 --spider http://localhost/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
-

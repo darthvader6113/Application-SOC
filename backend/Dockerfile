@@ -1,21 +1,22 @@
 # ==========================================
-# STAGE 1: Build Stage
+# STAGE 1: Build Stage & Production Dependencies
 # ==========================================
 FROM node:22-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first for Docker caching
-COPY package.json ./
-RUN npm install
+# Install dependencies using package-lock for lightning-fast deterministic installation
+COPY package.json package-lock.json* ./
+RUN npm ci --prefer-offline --no-audit --no-fund || npm install --prefer-offline --no-audit --no-fund
 
-# Copy source code and build TypeScript
+# Copy source and build TypeScript
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build
+RUN npm run build && npm prune --omit=dev && npm cache clean --force
 
 # ==========================================
-# STAGE 2: Lightweight Production Runtime
+# STAGE 2: Ultra-Lightweight Production Runtime
+# (No npm install in this stage — copies pre-pruned modules)
 # ==========================================
 FROM node:22-alpine AS runner
 
@@ -25,11 +26,9 @@ ENV NODE_ENV=production
 # Restrict Node memory ceiling to 256MB to avoid exhausting 2GB VPS
 ENV NODE_OPTIONS="--max-old-space-size=256"
 
-# Install production dependencies only
-COPY package.json ./
-RUN npm install --omit=dev && npm cache clean --force
-
-# Copy built code from builder
+# Copy pre-pruned production dependencies and compiled artifacts from builder
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/dist ./dist
 
 # Security hardening: Run as non-root user
@@ -41,4 +40,3 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:5000/api/security/health || exit 1
 
 CMD ["node", "dist/index.js"]
-
