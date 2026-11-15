@@ -55,9 +55,22 @@ PORT=5000
 NODE_ENV=production
 ```
 
-### 2. Build & Launch in Docker
+### 2. Build & Launch in Docker (Fast & Lightweight)
+
+On a **1 vCPU / 2GB RAM** VPS, always build sequentially so that Node/npm doesn't exhaust the single CPU core:
+
 ```bash
-docker compose up -d --build
+# Recommended 1 vCPU command (builds services sequentially without freezing):
+COMPOSE_PARALLEL_LIMIT=1 docker compose up -d --build
+```
+
+*(Optional - if your VPS has no swap space configured)*:
+It is strongly recommended on any 1 vCPU / 2GB RAM Linux VPS to enable a small 2GB swap file to prevent the Linux kernel OOM killer from killing Docker builds:
+```bash
+sudo fallocate -l 2G /swapfile
+sudo chmod 600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
 ```
 
 ### 3. Verify Health & Running Services
