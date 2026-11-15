@@ -1,0 +1,15 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+Allow: /logo.png
+Allow: /favicon.png
+Allow: /favicon.ico
+Allow: /assets/
+
+# Crawl-delay for considerate crawling
+Crawl-delay: 1
+
+# Host & Sitemap specification
+Host: https://hardmanreed.com
+Sitemap: https://hardmanreed.com/sitemap.xml
+

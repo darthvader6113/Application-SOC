@@ -1,0 +1,80 @@
+@import '@mantine/core/styles.css';
+
+:root {
+  --mantine-font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --mantine-font-family-headings: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+body {
+  background-color: #fbfcfd;
+  color: #1a1e24;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: var(--mantine-font-family);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ensure no shadows on buttons and cards across the application */
+button,
+.mantine-Button-root,
+.mantine-Card-root,
+.mantine-Paper-root {
+  box-shadow: none !important;
+}
+
+/* Prevent horizontal scrollbars in modals */
+.mantine-Modal-content {
+  overflow: hidden !important;
+}
+
+.mantine-Modal-body {
+  overflow-x: hidden !important;
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, #094067 0%, #1971c2 50%, #1098ad 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtle-glass {
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+}
+
+.card-hover {
+  transition: transform 0.2s ease, border-color 0.2s ease;
+  box-shadow: none !important;
+}
+
+.card-hover:hover {
+  transform: translateY(-2px);
+  border-color: #74c0fc !important;
+  box-shadow: none !important;
+}
+
+.hero-glow {
+  position: absolute;
+  top: -10%;
+  right: -5%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(25, 113, 194, 0.10) 0%, rgba(20, 184, 166, 0.04) 50%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.pulse-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background-color: #12b886;
+  border-radius: 50%;
+}
