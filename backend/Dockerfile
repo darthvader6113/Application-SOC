@@ -6,16 +6,17 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ENV NODE_ENV=development
+# Install typescript compiler globally so tsc is unconditionally available
+RUN npm install -g typescript --no-audit --no-fund
 
-# Install all dependencies (including typescript)
+# Install project runtime and build dependencies
 COPY package.json package-lock.json* ./
 RUN npm install --prefer-offline --no-audit --no-fund
 
-# Copy source and build TypeScript
+# Copy source and compile TypeScript directly with tsc
 COPY tsconfig.json ./
 COPY src ./src
-RUN npm run build && npm prune --omit=dev && npm cache clean --force
+RUN tsc && npm prune --omit=dev && npm cache clean --force
 
 # ==========================================
 # STAGE 2: Ultra-Lightweight Production Runtime

@@ -6,11 +6,10 @@ FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-ENV NODE_ENV=development
-# Allocate safe memory for Vite bundling
-ENV NODE_OPTIONS="--max-old-space-size=1024"
+# Install typescript and vite globally for rock-solid CLI compilation
+RUN npm install -g typescript vite --no-audit --no-fund
 
-# Install all packages (React, Mantine, Vite, TypeScript)
+# Install project dependencies
 COPY package.json package-lock.json* ./
 RUN npm install --prefer-offline --no-audit --no-fund
 
@@ -18,7 +17,9 @@ COPY tsconfig.json vite.config.ts postcss.config.cjs index.html ./
 COPY public ./public
 COPY src ./src
 
-RUN npm run build
+# Allocate safe memory for Vite bundling
+ENV NODE_OPTIONS="--max-old-space-size=1024"
+RUN tsc && vite build
 
 # ==========================================
 # STAGE 2: High-Performance Alpine Nginx
